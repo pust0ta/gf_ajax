@@ -1,0 +1,75 @@
+<?php 
+
+/**
+ * @file
+ * GF Ajax Features - Core functions.
+ */
+
+/**
+ * Implements hook_form_alter().
+ */
+function gf_ajax_form_alter(&$form, $form_state, $form_id) {
+  // Добавляем ajax-фонкциональность кнопке "отправить"
+  // формы добавления в корзину.
+  if (preg_match('/^uc_product_add_to_cart_form_/', $form_id)
+    || preg_match('/^uc_catalog_buy_it_now_form_/', $form_id)
+    || preg_match('/^uc_product_kit_add_to_cart_form/', $form_id)) {
+    $form['actions']['submit']['#ajax'] = array(
+      'callback' => 'gf_ajax_ubercart_add_to_cart',
+      // 'wrapper' => 'checkboxes-div',
+      // 'method' => 'replace',
+      // 'effect' => 'fade',
+    );
+  }
+}
+
+
+/**
+ * Чего и куда возвращаем аяксом после нажатия на кнопку добавления
+ * в карзину(продукты уже добавлены).
+ *
+ */
+function gf_ajax_ubercart_add_to_cart($form, $form_state){
+  $commands = array();
+  // TODO: реализовать возможность задавать контейнеры
+  // в DOM`е страницы.
+
+  // Если включен модуль няшных мессаг, то будем выводить
+  // сообщения корзины через него.
+  if (module_exists('nicemessages')) {
+    $items = array();
+    foreach (drupal_get_messages() as $type => $messages) {
+      foreach ($messages as $key => $message) {
+        $item = array(
+          'type' => $type,
+          'content' => $message,
+          'life' => variable_get('nicemessages_' . $type . '_life', '6') * 1000,
+          'glue' => variable_get('nicemessages_' . $type . '_glue', 'after'),
+          'speed' => variable_get('nicemessages_' . $type . '_speed', 'slow'),
+        );
+        $items[] = $item;
+      }
+    }
+    $settings = array(
+      'position' => variable_get('nicemessages_position', 'bottom-left'),
+      'items' => $items,
+    );
+    drupal_alter('nicemessages', $settings);
+    drupal_add_js(array('nicemessages' => $settings), 'setting');
+
+    $commands[] = ajax_command_settings($settings);
+  }
+  else {
+    // Контейнер, внутри которого отображаются сообщения.
+    $msg_container = variable_get('gf_ajax_msg_container', '.alert'); # надо реализовать настройку
+    // Контейнер, куда будут вставляться наши мессаги(внутрь в начало).
+    $content_container = variable_get('gf_ajax_content_container', '#content'); # надо реализовать настройку
+    $commands[] = ajax_command_remove($msg_container);
+    $commands[] = ajax_command_prepend($content, theme('status_messages'));
+  }
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}

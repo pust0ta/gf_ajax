@@ -1,0 +1,6 @@
+name = GF Ajax Features
+description = "Ajax Features for the giorgio-ferretti.it"
+package = Giorgio-Ferretti
+core = 7.x
+
+dependencies[] = uc_cart
