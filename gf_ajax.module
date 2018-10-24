@@ -16,6 +16,10 @@ function gf_ajax_form_alter(&$form, $form_state, $form_id) {
     || preg_match('/^uc_product_kit_add_to_cart_form/', $form_id)) {
     $form['actions']['submit']['#ajax'] = array(
       'callback' => 'gf_ajax_ubercart_add_to_cart',
+      'progress' => [
+        'type' => 'throbber',
+        'message' => '',
+      ],
       // 'wrapper' => 'checkboxes-div',
       // 'method' => 'replace',
       // 'effect' => 'fade',
