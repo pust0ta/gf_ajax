@@ -69,7 +69,7 @@ function gf_ajax_ubercart_add_to_cart($form, $form_state){
     // Контейнер, куда будут вставляться наши мессаги(внутрь в начало).
     $content_container = variable_get('gf_ajax_content_container', '#content'); # надо реализовать настройку
     $commands[] = ajax_command_remove($msg_container);
-    $commands[] = ajax_command_prepend($content, theme('status_messages'));
+    $commands[] = ajax_command_prepend($content_container, theme('status_messages'));
   }
 
   return array(
